@@ -3,7 +3,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* optional */
+}
+
 @theme inline {
+  --color-simora-purple: #8e54e9;
+  --color-simora-blue: #4776e6;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);

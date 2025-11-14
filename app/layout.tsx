@@ -1,6 +1,20 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  poppins,
+  lato,
+  cinzelDecorative,
+  tangerine,
+  sacramento,
+  greatVibes,
+  sourceCodePro,
+  ibmPlexMono,
+  notoSansDevanagari,
+  hind,
+} from '@/lib/fonts';
+
 import "./globals.css";
+import type { Metadata } from "next";
+import { Toaster } from "@/components/ui/sonner";
+import { Geist, Geist_Mono } from "next/font/google";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,12 +37,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    <html lang="en" className="dark h-full w-full">
+      <body className={
+        `${geistSans.variable}
+        antialiased h-full w-full
+        ${geistMono.variable} 
+        ${poppins.variable}
+        ${lato.variable}
+        ${cinzelDecorative.variable}
+        ${tangerine.variable}
+        ${sacramento.variable}
+        ${greatVibes.variable}
+        ${sourceCodePro.variable}
+        ${ibmPlexMono.variable}
+        ${notoSansDevanagari.variable}
+        ${hind.variable}`}
       >
         {children}
+        <Toaster />
       </body>
-    </html>
+    </html >
   );
 }
