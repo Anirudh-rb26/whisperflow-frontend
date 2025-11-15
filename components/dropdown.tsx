@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ScrollArea } from './ui/scroll-area';
 
 interface dropdownProps {
-    title: string;
+    title?: string;
     initialValue: string;
     values: string[];
     setValue: (value: string) => void;
@@ -34,7 +34,7 @@ const Dropdown = ({ title, initialValue, values, setValue, showValuesInOwnStyle,
     };
 
     return (
-        <div className='space-y-2 w-full'>
+        <div className='w-full'>
             <h2 className='text-sm font-medium'>{title}</h2>
             <DropdownMenu>
                 <DropdownMenuTrigger className='w-full'>

@@ -1,10 +1,12 @@
-import { Player } from '@remotion/player';
-import React, { useEffect, useMemo, useState } from 'react';
+import { Player, PlayerRef } from '@remotion/player';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Html5Video } from 'remotion';
 import { Card } from './ui/card';
 
 interface VideoPreviewProps {
     file: File;
+    onTimeUpdate?: (time: number) => void;
+    videoControlRef?: React.MutableRefObject<{ seekTo: (time: number) => void } | null>;
 }
 
 const MyVideoComposition = ({ src }: { src: string }) => (
@@ -17,7 +19,8 @@ const MyVideoComposition = ({ src }: { src: string }) => (
     </div>
 );
 
-const VideoPreview = ({ file }: VideoPreviewProps) => {
+const VideoPreview = ({ file, onTimeUpdate, videoControlRef }: VideoPreviewProps) => {
+    const playerRef = useRef<PlayerRef>(null);
     const videoUrl = useMemo(() => {
         const url = URL.createObjectURL(file);
 
@@ -27,6 +30,19 @@ const VideoPreview = ({ file }: VideoPreviewProps) => {
     const [videoDuration, setVideoDuration] = useState<number | null>(null);
     const [videoDimensions, setVideoDimensions] = useState({ width: 1280, height: 720 });
     const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        if (videoControlRef) {
+            videoControlRef.current = {
+                seekTo: (time: number) => {
+                    if (playerRef.current && videoDuration) {
+                        const frame = Math.floor(time * 30); // Convert seconds to frames (30 fps)
+                        playerRef.current.seekTo(frame);
+                    }
+                }
+            };
+        }
+    }, [videoControlRef, videoDuration]);
 
     useEffect(() => {
 
@@ -70,7 +86,18 @@ const VideoPreview = ({ file }: VideoPreviewProps) => {
         };
     }, [videoUrl, isLoaded]);
 
+    useEffect(() => {
+        if (!playerRef.current || !onTimeUpdate) return;
 
+        const interval = setInterval(() => {
+            if (playerRef.current) {
+                const currentFrame = playerRef.current.getCurrentFrame();
+                const timeInSeconds = currentFrame / 30; // Convert frames to seconds
+                onTimeUpdate(timeInSeconds);
+            }
+        }, 100);
+        return () => clearInterval(interval);
+    }, [onTimeUpdate]);
 
     if (!videoDuration) {
         return (
@@ -83,6 +110,7 @@ const VideoPreview = ({ file }: VideoPreviewProps) => {
     return (
         <div className="w-full h-full items-center justify-center flex p-3">
             <Player
+                ref={playerRef}
                 component={MyVideoComposition}
                 inputProps={{ src: videoUrl }}
                 durationInFrames={videoDuration}
