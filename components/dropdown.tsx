@@ -34,7 +34,7 @@ const Dropdown = ({ title, initialValue, values, setValue, showValuesInOwnStyle,
     };
 
     return (
-        <div className='space-y-2'>
+        <div className='space-y-2 w-full'>
             <h2 className='text-sm font-medium'>{title}</h2>
             <DropdownMenu>
                 <DropdownMenuTrigger className='w-full'>
@@ -43,11 +43,12 @@ const Dropdown = ({ title, initialValue, values, setValue, showValuesInOwnStyle,
                         <ChevronDown />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <ScrollArea className='overflow-auto'>
+                <DropdownMenuContent className='min-w-(--radix-dropdown-menu-trigger-width)'>
+                    <ScrollArea className='overflow-auto w-full'>
                         {values.map((value, index) => {
                             return (
                                 <DropdownMenuItem
+                                    className='w-full'
                                     key={index}
                                     onClick={() => { setValue(value) }}
                                     style={getItemStyle(value)}

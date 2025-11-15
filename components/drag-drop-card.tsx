@@ -1,11 +1,15 @@
-import React, { useRef, useState } from 'react'
 import { toast } from 'sonner';
 import { Card } from './ui/card';
 import { Upload } from 'lucide-react';
+import React, { SetStateAction, useRef, useState } from 'react'
 
-const DragDropCard = () => {
+interface dragDropCardProps {
+    file: File | null;
+    setFile: React.Dispatch<SetStateAction<File | null>>;
+}
+
+const DragDropCard = ({ file, setFile }: dragDropCardProps) => {
     const [isDragging, setIsDragging] = useState(false);
-    const [file, setFile] = useState<File | null>(null);
 
     const inputRef = useRef<HTMLInputElement>(null);
 
