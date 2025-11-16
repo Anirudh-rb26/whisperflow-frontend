@@ -1,11 +1,12 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
 import { Card } from './ui/card';
+import { PlayerRef, CallbackListener } from '@remotion/player';
 
 interface TranscriptViewerProps {
     transcript: string;
     type: 'SRT' | 'VTT';
-    currentTime?: number;
     onSeek?: (time: number) => void;
+    playerRef: React.RefObject<PlayerRef | null>;
 }
 
 interface TranscriptSegment {
@@ -16,7 +17,6 @@ interface TranscriptSegment {
 }
 
 const parseTimestamp = (timestamp: string): number => {
-    // Handles both SRT (HH:MM:SS,mmm) and VTT (HH:MM:SS.mmm) formats
     const cleanTimestamp = timestamp.replace(',', '.');
     const parts = cleanTimestamp.split(':');
     const hours = parseInt(parts[0]);
@@ -87,12 +87,47 @@ const parseVTT = (vtt: string): TranscriptSegment[] => {
     return segments;
 };
 
-const TranscriptViewer = ({ transcript, type, currentTime = 0, onSeek }: TranscriptViewerProps) => {
+// Custom hook using useSyncExternalStore for optimal performance
+const useCurrentPlayerFrame = (ref: React.RefObject<PlayerRef | null>) => {
+    const subscribe = useCallback(
+        (onStoreChange: () => void) => {
+            const { current } = ref;
+            if (!current) {
+                return () => undefined;
+            }
+
+            const updater: CallbackListener<'frameupdate'> = ({ detail }) => {
+                onStoreChange();
+            };
+
+            current.addEventListener('frameupdate', updater);
+
+            return () => {
+                current.removeEventListener('frameupdate', updater);
+            };
+        },
+        [ref]
+    );
+
+    const data = useSyncExternalStore<number>(
+        subscribe,
+        () => ref.current?.getCurrentFrame() ?? 0,
+        () => 0
+    );
+
+    return data;
+};
+
+const TranscriptViewer = ({ transcript, type, onSeek, playerRef }: TranscriptViewerProps) => {
     const segments = useMemo(() => {
         return type === 'SRT' ? parseSRT(transcript) : parseVTT(transcript);
     }, [transcript, type]);
 
     const activeSegmentRef = useRef<HTMLDivElement>(null);
+
+    // Use the custom hook to get current frame
+    const currentFrame = useCurrentPlayerFrame(playerRef);
+    const currentTime = currentFrame / 30; // Convert frames to seconds (30 fps)
 
     // Find the currently active segment
     const activeSegmentIndex = useMemo(() => {
@@ -145,8 +180,7 @@ const TranscriptViewer = ({ transcript, type, currentTime = 0, onSeek }: Transcr
                                     #{segment.index}
                                 </span>
                             </div>
-                            <p className={`text-sm ${isActive ? 'font-medium' : ''
-                                }`}>
+                            <p className={`text-sm ${isActive ? 'font-medium' : ''}`}>
                                 {segment.text}
                             </p>
                         </div>

@@ -1,58 +1,61 @@
 import { Player, PlayerRef } from '@remotion/player';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Html5Video } from 'remotion';
 import { Card } from './ui/card';
+import CaptionOverlay from './caption-overlay';
 
 interface VideoPreviewProps {
     file: File;
-    onTimeUpdate?: (time: number) => void;
-    videoControlRef?: React.MutableRefObject<{ seekTo: (time: number) => void } | null>;
+    playerRef: React.RefObject<PlayerRef | null>;
+    videoControlRef?: React.RefObject<{ seekTo: (time: number) => void } | null>;
+    srtContent?: string | null;
 }
 
-const MyVideoComposition = ({ src }: { src: string }) => (
-    <div className="absolute inset-0 bg-black flex items-center justify-center">
-        <Html5Video
-            src={src}
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-            playsInline
-        />
-    </div>
-);
+const MyVideoComposition = ({ src, srtContent }: { src: string; srtContent?: string }) => {
+    console.log('SRT Content in Composition:', srtContent);
+    return (
+        <div className="absolute inset-0 bg-black flex items-center justify-center">
+            <Html5Video
+                src={src}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                playsInline
+            />
+            {srtContent && <CaptionOverlay srtContent={srtContent} />}
+        </div>
+    );
+}
 
-const VideoPreview = ({ file, onTimeUpdate, videoControlRef }: VideoPreviewProps) => {
-    const playerRef = useRef<PlayerRef>(null);
+const VideoPreview = ({ file, playerRef, videoControlRef, srtContent }: VideoPreviewProps) => {
+    console.log('SRT Content in VideoPreview:', srtContent);
     const videoUrl = useMemo(() => {
-        const url = URL.createObjectURL(file);
-
-        return url;
+        return URL.createObjectURL(file);
     }, [file]);
 
     const [videoDuration, setVideoDuration] = useState<number | null>(null);
     const [videoDimensions, setVideoDimensions] = useState({ width: 1280, height: 720 });
     const [isLoaded, setIsLoaded] = useState(false);
 
+    // Setup video control ref for seeking
     useEffect(() => {
         if (videoControlRef) {
             videoControlRef.current = {
                 seekTo: (time: number) => {
                     if (playerRef.current && videoDuration) {
-                        const frame = Math.floor(time * 30); // Convert seconds to frames (30 fps)
+                        const frame = Math.floor(time * 30);
                         playerRef.current.seekTo(frame);
                     }
                 }
             };
         }
-    }, [videoControlRef, videoDuration]);
+    }, [videoControlRef, videoDuration, playerRef]);
 
+    // Load video metadata
     useEffect(() => {
-
         const video = document.createElement('video');
 
         const handleLoadedMetadata = () => {
-
             const duration = video.duration;
             const fps = 30;
-
 
             setVideoDuration(Math.ceil(duration * fps));
             setVideoDimensions({
@@ -70,13 +73,10 @@ const VideoPreview = ({ file, onTimeUpdate, videoControlRef }: VideoPreviewProps
         video.addEventListener('loadedmetadata', handleLoadedMetadata);
         video.addEventListener('error', handleError);
 
-
         video.src = videoUrl;
         video.load();
 
-
         return () => {
-
             video.removeEventListener('loadedmetadata', handleLoadedMetadata);
             video.removeEventListener('error', handleError);
             video.remove();
@@ -85,19 +85,6 @@ const VideoPreview = ({ file, onTimeUpdate, videoControlRef }: VideoPreviewProps
             }
         };
     }, [videoUrl, isLoaded]);
-
-    useEffect(() => {
-        if (!playerRef.current || !onTimeUpdate) return;
-
-        const interval = setInterval(() => {
-            if (playerRef.current) {
-                const currentFrame = playerRef.current.getCurrentFrame();
-                const timeInSeconds = currentFrame / 30; // Convert frames to seconds
-                onTimeUpdate(timeInSeconds);
-            }
-        }, 100);
-        return () => clearInterval(interval);
-    }, [onTimeUpdate]);
 
     if (!videoDuration) {
         return (
@@ -108,17 +95,20 @@ const VideoPreview = ({ file, onTimeUpdate, videoControlRef }: VideoPreviewProps
     }
 
     return (
-        <div className="w-full h-full items-center justify-center flex p-3">
+        <div className="w-full h-full flex items-center justify-center">
             <Player
                 ref={playerRef}
                 component={MyVideoComposition}
-                inputProps={{ src: videoUrl }}
+                inputProps={{
+                    src: videoUrl,
+                    srtContent: srtContent || undefined,
+                }}
                 durationInFrames={videoDuration}
                 compositionWidth={videoDimensions.width}
                 compositionHeight={videoDimensions.height}
                 fps={30}
                 controls
-                style={{ width: '100%', maxWidth: 800, aspectRatio: '16/9', borderRadius: 8 }}
+                style={{ width: '100%', height: '100%', maxHeight: '100%', borderRadius: 8 }}
             />
         </div>
     );

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { SetStateAction, useState } from 'react'
 import { Card } from './ui/card'
 import { Button } from './ui/button'
 import { fetchTranscript, TranscriptionResponse } from '@/services/fetchTranscription'
@@ -11,18 +11,22 @@ import Dropdown from './dropdown'
 import TranscriptViewer from './transcript-viewer'
 import { Download, FileText, AlertCircle, Video } from 'lucide-react'
 import { Alert, AlertDescription } from './ui/alert'
+import { PlayerRef } from '@remotion/player'
 
 interface transcriptCardProps {
     file: File;
     currentTime?: number;
     onSeek?: (time: number) => void;
+    playerRef: React.RefObject<PlayerRef | null>;
+    srt: string;
+    setSrt: React.Dispatch<SetStateAction<string | null>>
+    vtt: string;
+    setVtt: React.Dispatch<SetStateAction<string | null>>
 }
 
-const TranscriptCard = ({ file, currentTime, onSeek }: transcriptCardProps) => {
+const TranscriptCard = ({ file, onSeek, playerRef, srt, setSrt, vtt, setVtt }: transcriptCardProps) => {
     const [loading, setLoading] = useState(false);
     const [caption, setCaption] = useState("SRT");
-    const [srt, setSrt] = useState<string | null>(null);
-    const [vtt, setVtt] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const handleClick = async (file: File) => {
@@ -166,11 +170,11 @@ const TranscriptCard = ({ file, currentTime, onSeek }: transcriptCardProps) => {
                         {/* Transcript viewer */}
                         <ScrollArea className='w-full flex-1 min-h-0'>
                             {caption === 'SRT' && srt && (
-                                <TranscriptViewer transcript={srt} type={"SRT"} currentTime={currentTime} onSeek={onSeek} />
+                                <TranscriptViewer transcript={srt} type={"SRT"} onSeek={onSeek} playerRef={playerRef} />
                             )}
 
                             {caption === 'VTT' && vtt && (
-                                <TranscriptViewer transcript={vtt} type={"VTT"} currentTime={currentTime} onSeek={onSeek} />
+                                <TranscriptViewer transcript={vtt} type={"VTT"} onSeek={onSeek} playerRef={playerRef} />
                             )}
                         </ScrollArea>
                     </div>
