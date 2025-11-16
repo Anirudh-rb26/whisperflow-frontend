@@ -2,10 +2,11 @@
 
 import { Card } from './ui/card'
 import Dropdown from './dropdown'
-import React, { useState } from 'react'
+import React, { SetStateAction, useState, useEffect } from 'react'
 import { Separator } from './ui/separator'
 import { ScrollArea } from './ui/scroll-area'
 import HorizontalColorPicker from './horizontal-colorpicker'
+import { CaptionStyles } from '@/app/page'
 
 const captionStyles = [
     "Karaoke Style",
@@ -41,15 +42,27 @@ const fontSizeOptions = [
     "xl",
 ]
 
+interface captionControlsProps {
+    setGlobalCaptionStyle: React.Dispatch<SetStateAction<CaptionStyles | null>>;
+}
 
-const CaptionControls = () => {
+const CaptionControls = ({ setGlobalCaptionStyle }: captionControlsProps) => {
     const [textColor, setTextColor] = useState("#ffffff");
     const [backgroundColor, setbackgroundColor] = useState("#000000");
-
     const [font, setFont] = useState("Poppins");
     const [fontsize, setFontSize] = useState("md");
-
     const [captionStyle, setCaptionStyle] = useState("Standard (Bottom Centered)");
+
+    useEffect(() => {
+        setGlobalCaptionStyle({
+            captionStyle: captionStyle,
+            captionTextColor: textColor,
+            captionBackgroundColor: backgroundColor,
+            fontFamily: font,
+            fontSize: fontsize
+        });
+    }, [captionStyle, textColor, backgroundColor, font, fontsize, setGlobalCaptionStyle]);
+
     return (
         <Card className='w-full h-full p-4'>
             <ScrollArea className='p-4 overflow-auto space-y-6'>

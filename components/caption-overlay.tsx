@@ -2,12 +2,22 @@
 
 import { useCurrentFrame, useVideoConfig } from 'remotion';
 import { parseSrt } from '@remotion/captions';
+import { CaptionStyles } from '@/app/page';
 
 interface CaptionOverlayProps {
     srtContent: string;
+    captionStyle: CaptionStyles;
 }
 
-const CaptionOverlay = ({ srtContent }: CaptionOverlayProps) => {
+const fontSizeMap: Record<string, string> = {
+    sm: '18px',
+    md: '24px',
+    lg: '32px',
+    xl: '48px',
+};
+
+
+const CaptionOverlay = ({ srtContent, captionStyle }: CaptionOverlayProps) => {
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
 
@@ -42,12 +52,13 @@ const CaptionOverlay = ({ srtContent }: CaptionOverlayProps) => {
                 bottom: '10%',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                color: 'white',
+                backgroundColor: captionStyle.captionBackgroundColor || 'rgba(0, 0, 0, 0.8)',
+                color: captionStyle.captionTextColor || 'white',
                 padding: '12px 24px',
                 borderRadius: '8px',
-                fontSize: '24px',
+                fontSize: fontSizeMap[captionStyle.fontSize] || '24px', // Dynamic size
                 fontWeight: 'bold',
+                fontFamily: captionStyle.fontFamily || 'sans-serif',
                 textAlign: 'center',
                 maxWidth: '80%',
                 zIndex: 10,
@@ -56,6 +67,7 @@ const CaptionOverlay = ({ srtContent }: CaptionOverlayProps) => {
             {activeCaption.text}
         </div>
     );
+
 };
 
 export default CaptionOverlay;

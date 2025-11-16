@@ -3,15 +3,17 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Html5Video } from 'remotion';
 import { Card } from './ui/card';
 import CaptionOverlay from './caption-overlay';
+import { CaptionStyles } from '@/app/page';
 
 interface VideoPreviewProps {
     file: File;
     playerRef: React.RefObject<PlayerRef | null>;
     videoControlRef?: React.RefObject<{ seekTo: (time: number) => void } | null>;
     srtContent?: string | null;
+    captionStyle: CaptionStyles | null;
 }
 
-const MyVideoComposition = ({ src, srtContent }: { src: string; srtContent?: string }) => {
+const MyVideoComposition = ({ src, srtContent, captionStyle }: { src: string; srtContent?: string, captionStyle: CaptionStyles | undefined }) => {
     console.log('SRT Content in Composition:', srtContent);
     return (
         <div className="absolute inset-0 bg-black flex items-center justify-center">
@@ -20,12 +22,12 @@ const MyVideoComposition = ({ src, srtContent }: { src: string; srtContent?: str
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 playsInline
             />
-            {srtContent && <CaptionOverlay srtContent={srtContent} />}
+            {srtContent && <CaptionOverlay srtContent={srtContent} captionStyle={captionStyle!} />}
         </div>
     );
 }
 
-const VideoPreview = ({ file, playerRef, videoControlRef, srtContent }: VideoPreviewProps) => {
+const VideoPreview = ({ file, playerRef, videoControlRef, srtContent, captionStyle }: VideoPreviewProps) => {
     console.log('SRT Content in VideoPreview:', srtContent);
     const videoUrl = useMemo(() => {
         return URL.createObjectURL(file);
@@ -102,6 +104,7 @@ const VideoPreview = ({ file, playerRef, videoControlRef, srtContent }: VideoPre
                 inputProps={{
                     src: videoUrl,
                     srtContent: srtContent || undefined,
+                    captionStyle: captionStyle || undefined
                 }}
                 durationInFrames={videoDuration}
                 compositionWidth={videoDimensions.width}

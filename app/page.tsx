@@ -9,12 +9,26 @@ import { Button } from "@/components/ui/button";
 import { Trash2Icon } from "lucide-react";
 import { PlayerRef } from "@remotion/player";
 
+export type CaptionStyles = {
+  captionStyle: string;
+  captionTextColor: string;
+  captionBackgroundColor: string;
+  fontFamily: string;
+  fontSize: string;
+}
+
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const playerRef = useRef<PlayerRef | null>(null);
 
   const [srt, setSrt] = useState<string | null>(null);
   const [vtt, setVtt] = useState<string | null>(null);
+
+  const [captionStyle, setCaptionStyle] = useState<CaptionStyles | null>(null);
+
+  useEffect(() => {
+    console.log("Caption Style: ", captionStyle);
+  }, [captionStyle]);
 
   // Video control ref - allows transcript to control video playback
   const videoControlRef = useRef<{ seekTo: (time: number) => void } | null>(null);
@@ -37,6 +51,7 @@ export default function Home() {
                 playerRef={playerRef}
                 videoControlRef={videoControlRef}
                 srtContent={srt}
+                captionStyle={captionStyle}
               />
               <Button
                 variant={"destructive"}
@@ -55,7 +70,7 @@ export default function Home() {
 
         {/* Caption Controls Section */}
         <div className="h-full w-[50%]">
-          <CaptionControls />
+          <CaptionControls setGlobalCaptionStyle={setCaptionStyle} />
         </div>
       </div>
 
