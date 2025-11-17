@@ -26,6 +26,8 @@ export default function Home() {
   const [srt, setSrt] = useState<string | null>(null);
   const [vtt, setVtt] = useState<string | null>(null);
 
+  const [language, setLanguage] = useState<string>("English");
+
   const [captionStyle, setCaptionStyle] = useState<CaptionStyles | null>(null);
 
   // NEW: Add state for download URL and rendering status
@@ -79,7 +81,7 @@ export default function Home() {
 
         {/* Caption Controls Section */}
         <div className="h-full w-[50%]">
-          <CaptionControls setGlobalCaptionStyle={setCaptionStyle} />
+          <CaptionControls setGlobalCaptionStyle={setCaptionStyle} language={language} setLanguage={setLanguage} />
         </div>
       </div>
 
@@ -93,6 +95,7 @@ export default function Home() {
           setVtt={setVtt}
           playerRef={playerRef}
           downloadUrl={downloadUrl}
+          currentLanguage={language}
           captionStyle={captionStyle}
           setDownloadUrl={setDownloadUrl}
           isRenderingVideo={isRenderingVideo}

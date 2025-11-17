@@ -3,31 +3,40 @@
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import React, { useState } from 'react'
-import { Copy, Download, Video } from 'lucide-react'
+import { Copy, Download, Video, Terminal } from 'lucide-react'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card'
 import { toast } from 'sonner'
-
 
 interface DownloadHoverCardProps {
     isRendering: boolean;
     downloadUrl: string | null;
+    cliCommand: string | null;
     onRender: () => void;
 }
-
 
 const DownloadHoverCard: React.FC<DownloadHoverCardProps> = ({
     isRendering,
     downloadUrl,
+    cliCommand,
     onRender,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    const handleCopyCommand = () => {
+    const handleCopyCliCommand = () => {
+        if (!cliCommand) return;
+
+        navigator.clipboard.writeText(cliCommand);
+        toast("Copied!", {
+            description: "CLI command copied to clipboard",
+            duration: 2000,
+        });
+    };
+
+    const handleCopyDownloadCommand = () => {
         if (!downloadUrl) return;
 
         const command = `curl -o output.mp4 "${downloadUrl}"`;
         navigator.clipboard.writeText(command);
-
         toast("Copied!", {
             description: "Download command copied to clipboard",
             duration: 2000,
@@ -64,7 +73,7 @@ const DownloadHoverCard: React.FC<DownloadHoverCardProps> = ({
                 </Button>
             </HoverCardTrigger>
 
-            <HoverCardContent className="w-80" align="end">
+            <HoverCardContent className="w-96" align="end">
                 <div className="space-y-4">
                     <div className="space-y-2">
                         <h4 className="font-medium text-sm">Download Video</h4>
@@ -75,26 +84,58 @@ const DownloadHoverCard: React.FC<DownloadHoverCardProps> = ({
                         </p>
                     </div>
 
-                    {downloadUrl && (
+                    {downloadUrl && cliCommand && (
                         <div className="space-y-3">
-                            {/* Command Input Field */}
-                            <div className="flex gap-2">
-                                <Input
-                                    type="text"
-                                    value={`curl -o output.mp4 "${downloadUrl}"`}
-                                    disabled
-                                    className="text-xs"
-                                    readOnly
-                                />
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={handleCopyCommand}
-                                    className="gap-1"
-                                >
-                                    <Copy className="h-3 w-3" />
-                                    Copy
-                                </Button>
+                            {/* Remotion CLI Command */}
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <Terminal className="h-3 w-3 text-muted-foreground" />
+                                    <span className="text-xs font-medium">Render Locally</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Input
+                                        type="text"
+                                        value={cliCommand}
+                                        disabled
+                                        className="text-xs font-mono"
+                                        readOnly
+                                    />
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={handleCopyCliCommand}
+                                        className="gap-1 shrink-0"
+                                    >
+                                        <Copy className="h-3 w-3" />
+                                        Copy
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Download Command */}
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <Download className="h-3 w-3 text-muted-foreground" />
+                                    <span className="text-xs font-medium">Download Command</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Input
+                                        type="text"
+                                        value={`curl -o output.mp4 "${downloadUrl}"`}
+                                        disabled
+                                        className="text-xs font-mono"
+                                        readOnly
+                                    />
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={handleCopyDownloadCommand}
+                                        className="gap-1 shrink-0"
+                                    >
+                                        <Copy className="h-3 w-3" />
+                                        Copy
+                                    </Button>
+                                </div>
                             </div>
 
                             {/* Direct Download Button */}
@@ -118,7 +159,7 @@ const DownloadHoverCard: React.FC<DownloadHoverCardProps> = ({
                 </div>
             </HoverCardContent>
         </HoverCard>
-    )
-}
+    );
+};
 
-export default DownloadHoverCard
+export default DownloadHoverCard;

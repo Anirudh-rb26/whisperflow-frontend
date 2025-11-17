@@ -44,9 +44,11 @@ const fontSizeOptions = [
 
 interface captionControlsProps {
     setGlobalCaptionStyle: React.Dispatch<SetStateAction<CaptionStyles | null>>;
+    language: string;
+    setLanguage: React.Dispatch<SetStateAction<string>>;
 }
 
-const CaptionControls = ({ setGlobalCaptionStyle }: captionControlsProps) => {
+const CaptionControls = ({ setGlobalCaptionStyle, language, setLanguage }: captionControlsProps) => {
     const [font, setFont] = useState("Poppins");
     const [fontsize, setFontSize] = useState("md");
     const [textColor, setTextColor] = useState("#ffffff");
@@ -69,6 +71,11 @@ const CaptionControls = ({ setGlobalCaptionStyle }: captionControlsProps) => {
             <ScrollArea className='p-4 overflow-auto space-y-6'>
                 <h1 className='mb-6 font-medium'>Customize Caption Styles</h1>
                 <Separator className='w-full text-muted-foreground my-4' />
+                {/* Caption Language */}
+                <Dropdown title='Select Caption Lanugage' initialValue={language} values={["English", "Hinglish", "Hindi"]} setValue={setLanguage} />
+
+                <Separator className='w-full text-muted-foreground my-4' />
+
                 {/* Caption Style */}
                 <Dropdown title='Caption Style' initialValue={captionStyle} values={captionStyles} setValue={setCaptionStyle} />
 

@@ -20,12 +20,22 @@ export interface TranscriptionError {
  */
 export async function fetchTranscript(
   file: File,
-  language: string = "auto"
+  language: string
 ): Promise<TranscriptionResponse> {
   try {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("language", language);
+
+    // Determine if we need Perplexity translation based on language
+    if (language === "hinglish") {
+      // For Hinglish: use current Perplexity prompt
+      formData.append("translate_to_hinglish", "true");
+    } else if (language === "hi") {
+      // For Hindi: translate to Devanagari script
+      formData.append("translate_to_hindi_script", "true");
+    }
+    // For English (en): don't add any translation flags
 
     const response = await fetch("http://localhost:8000/transcribe", {
       method: "POST",
