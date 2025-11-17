@@ -12,6 +12,8 @@ export interface TranscriptionError {
   detail: string;
 }
 
+const backendURL = process.env.NEXT_PUBLIC_BACKEND_SERVER_URL;
+
 /**
  * Fetches transcript from the Whisper.cpp FastAPI backend
  * @param file - Audio or video file to transcribe
@@ -27,7 +29,7 @@ export async function fetchTranscript(
     formData.append("file", file);
     formData.append("language", language);
 
-    const response = await fetch("http://localhost:8000/transcribe", {
+    const response = await fetch(`${backendURL}/transcribe`, {
       method: "POST",
       body: formData,
     });
@@ -52,7 +54,7 @@ export async function fetchTranscript(
  */
 export async function checkHealth(): Promise<boolean> {
   try {
-    const response = await fetch("http://localhost:8000/health");
+    const response = await fetch(`${backendURL}/health`);
     const data = await response.json();
     return data.status === "healthy" && data.executable_exists && data.model_exists;
   } catch {
