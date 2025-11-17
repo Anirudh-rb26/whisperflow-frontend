@@ -53,6 +53,8 @@ const TranscriptCard = ({
     const [error, setError] = useState<string | null>(null);
     const [cliCommand, setCliCommand] = useState<string | null>(null);
 
+    const backendURL = process.env.BACKEND_SERVER_URL;
+
     const handleClick = async (file: File) => {
         if (!file) {
             console.log("No File Selected");
@@ -108,7 +110,7 @@ const TranscriptCard = ({
             const formData = new FormData();
             formData.append('file', file);
 
-            const uploadResponse = await fetch('http://localhost:8000/upload', {
+            const uploadResponse = await fetch(`${backendURL}/upload`, {
                 method: 'POST',
                 body: formData,
             });
@@ -124,7 +126,7 @@ const TranscriptCard = ({
 
             // URL encode the filename to handle spaces and special characters
             const encodedFileName = encodeURIComponent(fileName);
-            const videoUrl = `http://localhost:8000/uploads/${encodedFileName}`;
+            const videoUrl = `${backendURL}/uploads/${encodedFileName}`;
 
             console.log('📹 Video URL for rendering:', videoUrl);
             console.log('✓ File uploaded successfully');
