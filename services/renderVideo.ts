@@ -9,7 +9,7 @@ export interface RenderVideoResponse {
   cliCommand: string;
 }
 
-const backendURL = process.env.LOCAL_BACKEND_SERVER_URL;
+const backendURL = process.env.BACKEND_SERVER_URL;
 
 export async function triggerVideoRender(params: {
   compositionId: string;

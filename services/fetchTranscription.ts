@@ -12,7 +12,7 @@ export interface TranscriptionError {
   detail: string;
 }
 
-const backendURL = process.env.LOCAL_BACKEND_SERVER_URL;
+const backendURL = process.env.BACKEND_SERVER_URL;
 
 /**
  * Fetches transcript from the Whisper.cpp FastAPI backend
