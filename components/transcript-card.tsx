@@ -53,7 +53,7 @@ const TranscriptCard = ({
     const [error, setError] = useState<string | null>(null);
     const [cliCommand, setCliCommand] = useState<string | null>(null);
 
-    const backendURL = process.env.BACKEND_SERVER_URL;
+    const backendURL = process.env.NEXT_PUBLIC_BACKEND_SERVER_URL;
 
     const handleClick = async (file: File) => {
         if (!file) {

@@ -12,8 +12,6 @@ export interface TranscriptionError {
   detail: string;
 }
 
-const backendURL = process.env.BACKEND_SERVER_URL;
-
 /**
  * Fetches transcript from the Whisper.cpp FastAPI backend
  * @param file - Audio or video file to transcribe
@@ -29,17 +27,7 @@ export async function fetchTranscript(
     formData.append("file", file);
     formData.append("language", language);
 
-    // Determine if we need Perplexity translation based on language
-    if (language === "hinglish") {
-      // For Hinglish: use current Perplexity prompt
-      formData.append("translate_to_hinglish", "true");
-    } else if (language === "hi") {
-      // For Hindi: translate to Devanagari script
-      formData.append("translate_to_hindi_script", "true");
-    }
-    // For English (en): don't add any translation flags
-
-    const response = await fetch(`${backendURL}/transcribe`, {
+    const response = await fetch("http://localhost:8000/transcribe", {
       method: "POST",
       body: formData,
     });
@@ -64,7 +52,7 @@ export async function fetchTranscript(
  */
 export async function checkHealth(): Promise<boolean> {
   try {
-    const response = await fetch(`${backendURL}/health`);
+    const response = await fetch("http://localhost:8000/health");
     const data = await response.json();
     return data.status === "healthy" && data.executable_exists && data.model_exists;
   } catch {
