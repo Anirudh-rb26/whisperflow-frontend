@@ -9,12 +9,14 @@ export interface RenderVideoResponse {
   cliCommand: string;
 }
 
+const backendURL = process.env.LOCAL_BACKEND_SERVER_URL;
+
 export async function triggerVideoRender(params: {
   compositionId: string;
   inputProps: any;
   renderConfig: any;
 }): Promise<RenderVideoResponse> {
-  const response = await fetch("http://localhost:8000/api/render/video", {
+  const response = await fetch(`${backendURL}/api/render/video`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
