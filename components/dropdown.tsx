@@ -35,7 +35,7 @@ const Dropdown = ({ title, initialValue, values, setValue, showValuesInOwnStyle,
 
     return (
         <div className='w-full'>
-            <h2 className='text-sm font-medium'>{title}</h2>
+            <h2 className='text-sm font-medium pb-2'>{title}</h2>
             <DropdownMenu>
                 <DropdownMenuTrigger className='w-full'>
                     <Button className='flex flex-row justify-between items-center w-full py-2 px-3' variant={'secondary'}>

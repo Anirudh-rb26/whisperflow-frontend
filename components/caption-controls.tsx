@@ -47,11 +47,12 @@ interface captionControlsProps {
 }
 
 const CaptionControls = ({ setGlobalCaptionStyle }: captionControlsProps) => {
-    const [textColor, setTextColor] = useState("#ffffff");
-    const [backgroundColor, setbackgroundColor] = useState("#000000");
     const [font, setFont] = useState("Poppins");
     const [fontsize, setFontSize] = useState("md");
+    const [textColor, setTextColor] = useState("#ffffff");
+    const [backgroundColor, setbackgroundColor] = useState("#000000");
     const [captionStyle, setCaptionStyle] = useState("Standard (Bottom Centered)");
+
 
     useEffect(() => {
         setGlobalCaptionStyle({

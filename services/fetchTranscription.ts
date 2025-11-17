@@ -20,7 +20,7 @@ export interface TranscriptionError {
  */
 export async function fetchTranscript(
   file: File,
-  language: string = "en"
+  language: string = "auto"
 ): Promise<TranscriptionResponse> {
   try {
     const formData = new FormData();

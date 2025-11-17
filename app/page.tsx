@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2Icon } from "lucide-react";
 import { PlayerRef } from "@remotion/player";
 
+
 export type CaptionStyles = {
   captionStyle: string;
   captionTextColor: string;
@@ -16,6 +17,7 @@ export type CaptionStyles = {
   fontFamily: string;
   fontSize: string;
 }
+
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -25,6 +27,10 @@ export default function Home() {
   const [vtt, setVtt] = useState<string | null>(null);
 
   const [captionStyle, setCaptionStyle] = useState<CaptionStyles | null>(null);
+
+  // NEW: Add state for download URL and rendering status
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [isRenderingVideo, setIsRenderingVideo] = useState(false);
 
   useEffect(() => {
     console.log("Caption Style: ", captionStyle);
@@ -57,6 +63,9 @@ export default function Home() {
                 variant={"destructive"}
                 onClick={() => {
                   setFile(null);
+                  setSrt(null);
+                  setVtt(null);
+                  setDownloadUrl(null);
                 }}
                 className="absolute top-1 right-4"
               >
@@ -77,13 +86,18 @@ export default function Home() {
       {/* Right Col - Transcript Section */}
       <div className="h-[50%]">
         <TranscriptCard
-          file={file!}
-          playerRef={playerRef}
-          onSeek={(time) => videoControlRef.current?.seekTo(time)}
           srt={srt!}
           vtt={vtt!}
+          file={file!}
           setSrt={setSrt}
           setVtt={setVtt}
+          playerRef={playerRef}
+          downloadUrl={downloadUrl}
+          captionStyle={captionStyle}
+          setDownloadUrl={setDownloadUrl}
+          isRenderingVideo={isRenderingVideo}
+          setIsRenderingVideo={setIsRenderingVideo}
+          onSeek={(time) => videoControlRef.current?.seekTo(time)}
         />
       </div>
     </div>

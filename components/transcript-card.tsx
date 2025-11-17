@@ -1,33 +1,56 @@
 "use client"
 
-import React, { SetStateAction, useState } from 'react'
 import { Card } from './ui/card'
-import { Button } from './ui/button'
-import { fetchTranscript, TranscriptionResponse } from '@/services/fetchTranscription'
-import { Sparkles } from './animated-icons/sparkles'
-import ShinyText from './ShinyText'
-import { ScrollArea } from './ui/scroll-area'
 import Dropdown from './dropdown'
-import TranscriptViewer from './transcript-viewer'
-import { Download, FileText, AlertCircle, Video } from 'lucide-react'
-import { Alert, AlertDescription } from './ui/alert'
+import ShinyText from './ShinyText'
+import { Button } from './ui/button'
+import { CaptionStyles } from '@/app/page'
 import { PlayerRef } from '@remotion/player'
+import { ScrollArea } from './ui/scroll-area'
+import TranscriptViewer from './transcript-viewer'
+import { Sparkles } from './animated-icons/sparkles'
+import { Alert, AlertDescription } from './ui/alert'
+import DownloadHoverCard from './download-hover-card'
+import React, { SetStateAction, useState } from 'react'
+import { Download, FileText, AlertCircle } from 'lucide-react'
+import { fetchTranscript, TranscriptionResponse } from '@/services/fetchTranscription'
+
 
 interface transcriptCardProps {
     file: File;
-    currentTime?: number;
-    onSeek?: (time: number) => void;
-    playerRef: React.RefObject<PlayerRef | null>;
     srt: string;
-    setSrt: React.Dispatch<SetStateAction<string | null>>
     vtt: string;
+    currentTime?: number;
+    isRenderingVideo: boolean;
+    downloadUrl: string | null;
+    onSeek?: (time: number) => void;
+    captionStyle: CaptionStyles | null;
+    playerRef: React.RefObject<PlayerRef | null>;
+    setSrt: React.Dispatch<SetStateAction<string | null>>
     setVtt: React.Dispatch<SetStateAction<string | null>>
+    setIsRenderingVideo: React.Dispatch<SetStateAction<boolean>>;
+    setDownloadUrl: React.Dispatch<SetStateAction<string | null>>;
 }
 
-const TranscriptCard = ({ file, onSeek, playerRef, srt, setSrt, vtt, setVtt }: transcriptCardProps) => {
+
+const TranscriptCard = ({
+    file,
+    onSeek,
+    playerRef,
+    srt,
+    setSrt,
+    vtt,
+    setVtt,
+    downloadUrl,
+    setDownloadUrl,
+    isRenderingVideo,
+    setIsRenderingVideo,
+    captionStyle,
+}: transcriptCardProps) => {
     const [loading, setLoading] = useState(false);
     const [caption, setCaption] = useState("SRT");
     const [error, setError] = useState<string | null>(null);
+
 
     const handleClick = async (file: File) => {
         if (!file) {
@@ -67,6 +90,45 @@ const TranscriptCard = ({ file, onSeek, playerRef, srt, setSrt, vtt, setVtt }: t
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    // NEW: Handle video render and download
+    const handleRenderVideo = async () => {
+        if (!file) return;
+
+        setIsRenderingVideo(true);
+        setError(null);
+
+        try {
+            const response = await fetch("http://localhost:8000/render-download", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    compositionId: "MyDemoVideo",
+                    inputProps: {
+                        src: URL.createObjectURL(file),
+                        srtContent: srt,
+                        captionStyle: captionStyle,
+                    },
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to render video");
+            }
+
+            const data = await response.json();
+            setDownloadUrl(`http://localhost:8000${data.downloadUrl}`);
+            console.log("✅ Video rendered successfully!");
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "Unknown error";
+            setError(errorMessage);
+            console.error("❌ Video render failed:", errorMessage);
+        } finally {
+            setIsRenderingVideo(false);
+        }
     }
 
     const captionsGenerated = srt || vtt;
@@ -156,14 +218,12 @@ const TranscriptCard = ({ file, onSeek, playerRef, srt, setSrt, vtt, setVtt }: t
                                     <Download className="h-4 w-4" />
                                     <span>Export {caption}</span>
                                 </Button>
-                                <Button
-                                    // onClick={ }
-                                    className="gap-2"
-                                    variant="default"
-                                >
-                                    <Video className="h-4 w-4" />
-                                    <span>Export Video</span>
-                                </Button>
+                                {/* NEW: Replace standard button with DownloadHoverCard */}
+                                <DownloadHoverCard
+                                    isRendering={isRenderingVideo}
+                                    downloadUrl={downloadUrl}
+                                    onRender={handleRenderVideo}
+                                />
                             </div>
                         </div>
 
